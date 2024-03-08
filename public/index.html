@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Transfer</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="p-10">
+    <form action="/upload" method="post" enctype="multipart/form-data" class="mb-10">
+        <label for="file" class="block text-gray-700 text-sm font-bold mb-2">Upload File:</label>
+        <input type="file" id="file" name="file" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <button type="submit" class="mt-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            Upload
+        </button>
+    </form>
+
+    <div>
+        <label for="id" class="block text-gray-700 text-sm font-bold mb-2">Download File:</label>
+        <input type="text" id="id" name="id" placeholder="Enter file ID" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <button id="download" class="mt-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            Download
+        </button>
+    </div>
+
+    <script>
+        document.getElementById('download').addEventListener('click', () => {
+            const id = document.getElementById('id').value;
+            window.location.href = `/download/${id}`;
+        });
+    </script>
+</body>
+</html>
