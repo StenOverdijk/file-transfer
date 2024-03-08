@@ -6,10 +6,11 @@ const fs = require('fs');
 const path = require('path');
 const upload = multer({ dest: 'uploads/' });
 
+// Define a global object to store file metadata
+const fileMetadata = {};
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -17,24 +18,44 @@ app.get('/', (req, res) => {
 
 app.listen(3000)
 
-
-
 // Set up Multer
 app.post('/upload', upload.single('file'), (req, res) => {
   // Check if a file was uploaded
   if (!req.file) {
+    console.error('No file was uploaded');
     return res.sendStatus(400);
   }
 
   // Generate a unique ID for this file
   const id = shortid.generate();
 
-  // Rename the file to include the unique ID
-  fs.rename(req.file.path, path.join(req.file.destination, id), err => {
-    if (err) return res.sendStatus(500);
+  // Store the original file name and extension
+  const originalName = req.file.originalname;
+  const extension = path.extname(originalName);
 
-    // Send the unique ID back to the client
-    res.send({ id });
+  // Log the file path before renaming
+  console.log(`Original file path: ${req.file.path}`);
+
+  // Rename the file to include the unique ID and the extension
+  fs.rename(req.file.path, path.join(req.file.destination, id + extension), err => {
+    if (err) {
+      console.error('Error renaming file', err);
+      return res.sendStatus(500);
+    }
+
+    // Log the new file path after renaming
+    console.log(`New file path: ${path.join(req.file.destination, id + extension)}`);
+
+    // Log the upload information
+    console.log(`File uploaded: ${originalName}`);
+    console.log(`Stored as: ${id + extension}`);
+    console.log(`File extension: ${extension}`);
+
+    // Store the file metadata
+    fileMetadata[id] = extension;
+
+    // Send the unique ID and the extension back to the client
+    res.send({ id, extension });
   });
 });
 
@@ -42,18 +63,29 @@ app.get('/download/:id', (req, res) => {
   // Get the unique ID from the route parameters
   const id = req.params.id;
 
+  // Get the extension from the file metadata
+  const extension = fileMetadata[id];
+
+  // If the extension does not exist, send a 404 response
+  if (!extension) {
+    return res.sendStatus(404);
+  }
+
   // Create a path to the file
-  const filePath = path.join('uploads', id);
+  const filePath = path.join('uploads', id + extension);
 
   // Check if the file exists
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
-      console.error('File does not exist');
+      console.error('File does not exist', err);
       return res.sendStatus(404);
     }
 
-    // Send the file
-    res.download(filePath);
+    // Log the download information
+    console.log(`File downloaded: ${id + extension}`);
+
+    // Send the file with the original extension
+    res.download(filePath, id + extension);
   });
 });
 
