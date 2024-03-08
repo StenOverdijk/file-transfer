@@ -18,6 +18,14 @@ app.get('/', (req, res) => {
 
 app.listen(3000)
 
+// app.js
+const db = require('./db_conn');
+
+db.query('SELECT 1 + 1 AS solution', (err, rows, fields) => {
+  if (err) throw err;
+  console.log('The solution is: ', rows[0].solution);
+});
+
 // Set up Multer
 app.post('/upload', upload.single('file'), (req, res) => {
   // Check if a file was uploaded
